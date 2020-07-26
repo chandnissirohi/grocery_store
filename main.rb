@@ -1,3 +1,6 @@
+require 'terminal-table/import'
+
+
 # Declaring constants
 GROCERY_ITEMS = ['milk', 'bread', 'apple', 'banana']
 
@@ -71,11 +74,32 @@ def get_discounted_bill(groceryItems)
     return result
 end
 
+def pricing_table(items)
+
+    return [] if items.empty?
+
+    result = []
+    items_group = items.group_by{ |item| item.name }
+    items_group.each { |name, list|
+    result << [ name, list.size, "$#{get_discounted_price(list)}"]    
+    }
+    result
+end
+
 total_bill = items.reduce(0) { |acc, item| 
     acc + item.unit_price
 }
 discounted_bill = get_discounted_bill(items)
 savings = total_bill - discounted_bill
+
+puts "\n"
+items_breakup = pricing_table(items)
+items_table = table { |t| 
+    t.headings = "Item", "Quantity", "Price"
+    items_breakup.each { |row| t << row}
+}
+puts items_table
+puts "\n"
 
 puts "Total price:  $#{discounted_bill.round(2)}"
 puts "You saved $#{savings.round(2)} today"
