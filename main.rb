@@ -46,11 +46,36 @@ if items.include? nil
     exit
 end
 
+# get discounted price
+def get_discounted_price(groceryItemsColl)
+    return 0 if groceryItemsColl.empty?
 
-p items
+    item = groceryItemsColl[0]
+    count = groceryItemsColl.size
+
+    if (item.sale_price.nil?)
+        return count * item.unit_price
+    end
+
+    quotient = count / item.sale_qty
+    remainder = count % item.sale_qty
+
+    return (quotient * item.sale_price) + (remainder * item.unit_price)
+end
+
+def get_discounted_bill(groceryItems)
+    groupHash = groceryItems.group_by { |item| item.name }
+    result = groupHash.reduce(0) { |acc, (name, list)|
+        acc + get_discounted_price(list)
+    }
+    return result
+end
 
 total_bill = items.reduce(0) { |acc, item| 
     acc + item.unit_price
 }
+discounted_bill = get_discounted_bill(items)
+savings = total_bill - discounted_bill
 
-puts "Total price:  $#{total_bill}"
+puts "Total price:  $#{discounted_bill.round(2)}"
+puts "You saved $#{savings.round(2)} today"
